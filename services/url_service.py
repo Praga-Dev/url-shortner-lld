@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import random
 
 from models.tiny_url_info import TinyURLInfo
@@ -13,7 +15,7 @@ class TinyURLService:
             raise Exception('INVALID URL')
         data = self.get_url_info(long_url)
         if not data:
-            tiny_url = str(random.randint(100000, 10000000))
+            tiny_url = self.__hash_url(long_url)
             data:TinyURLInfo = TinyURLInfo(tiny_url, long_url)
             self.__url_info[tiny_url] = data 
             return tiny_url
@@ -44,3 +46,12 @@ class TinyURLService:
         if long_url:
             return True 
         
+    def __hash_url(self, url):
+        if url:
+            # Generate a unique short URL hash
+            hash_value = hashlib.sha256(url.encode('utf-8')).hexdigest()
+            # Encode the hash value using base62
+            hash_url = base64.urlsafe_b64encode(hash_value.encode('utf-8')).decode('utf-8')[:6]
+            return hash_url
+
+                
